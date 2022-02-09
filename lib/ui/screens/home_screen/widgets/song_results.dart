@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
 import 'package:kuncie_test/blocs/search_songs/search_songs_cubit.dart';
 import 'package:kuncie_test/models/song.dart';
+import 'package:kuncie_test/ui/screens/home_screen/widgets/list_loading_tile.dart';
 import 'package:kuncie_test/ui/widgets/app_animation_wave.dart';
 import 'package:kuncie_test/ui/widgets/app_image.dart';
 
@@ -34,17 +35,16 @@ class SongResults extends StatelessWidget {
                   final playState =
                       BlocProvider.of<PlayingSongCubit>(context).state;
                   if (playState is PlayingSongIsPlaying) {
-                    print("inside ${playState.playerState} ${playState.song}");
 
                     if (playState.playerState == PlayerState.PLAYING &&
                         playState.song == song) {
                       return;
                     }
                   }
-                  print("$playState");
                   BlocProvider.of<PlayingSongCubit>(context)
                       .playSong(song, PlayerState.PLAYING);
                 },
+
                 trailing: BlocBuilder<PlayingSongCubit, PlayingSongState>(
                   builder: (context, state) {
                     if (state is PlayingSongIsPlaying) {
@@ -60,9 +60,10 @@ class SongResults extends StatelessWidget {
             itemCount: state.songs.length,
           );
         }
-        return Container(
-          color: Colors.red,
-        );
+        if (state is SearchSongsLoading) {
+          return ListLoadingTile();
+        }
+        return SizedBox.shrink();
       },
     );
   }

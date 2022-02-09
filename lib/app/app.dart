@@ -43,7 +43,7 @@ class App extends StatelessWidget {
           title: "Kuncie's Test",
           theme: lightTheme,
           darkTheme: darkTheme,
-          themeMode: ThemeMode.light,
+          themeMode: ThemeMode.dark,
         ),
       ),
     );

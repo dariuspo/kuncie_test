@@ -82,32 +82,32 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                 onPressed: _isPlaying ? null : () => _play(playedSong!),
                 iconSize: 20.0,
                 icon: const Icon(Icons.play_arrow),
-                color: Colors.cyan,
               ),
               IconButton(
                 key: const Key('pause_button'),
                 onPressed: _isPlaying ? _pause : null,
                 iconSize: 20.0,
                 icon: const Icon(Icons.pause),
-                color: Colors.cyan,
               ),
               IconButton(
                 key: const Key('stop_button'),
                 onPressed: _isPlaying || _isPaused ? _stop : null,
                 iconSize: 20.0,
                 icon: const Icon(Icons.stop),
-                color: Colors.cyan,
               ),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    _position != null
-                        ? '$_positionText / $_durationText'
-                        : _duration != null
-                            ? _durationText
-                            : '',
-                    style: const TextStyle(fontSize: 14.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      _position != null
+                          ? '$_positionText / $_durationText'
+                          : _duration != null
+                              ? _durationText
+                              : '',
+                      style: const TextStyle(fontSize: 14.0),
+                    ),
                   ),
                 ),
               )

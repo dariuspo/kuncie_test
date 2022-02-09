@@ -72,6 +72,8 @@ class _AppAnimationWaveState extends State<AppAnimationWave>
               }
             },
             child: Container(
+              alignment: Alignment.centerRight,
+              margin: EdgeInsets.symmetric(vertical: 10),
               padding: EdgeInsets.all(4),
               width: 25,
               height: 25,
