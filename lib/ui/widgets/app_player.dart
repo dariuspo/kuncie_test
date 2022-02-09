@@ -1,8 +1,5 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
 import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
 import 'package:kuncie_test/ui/widgets/expanded_section.dart';
 import 'package:kuncie_test/ui/widgets/player_widget.dart';
@@ -33,12 +30,7 @@ class _AppPlayerState extends State<AppPlayer> {
       },
       child: ExpandedSection(
         expand: isExpanded,
-        child: GestureDetector(
-          onTap: () => setState(() {
-            isExpanded = !isExpanded;
-          }),
-          child: PlayerWidget(),
-        ),
+        child: const PlayerWidget(),
       ),
     );
   }

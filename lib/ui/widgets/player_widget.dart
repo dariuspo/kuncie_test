@@ -62,12 +62,14 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   Widget build(BuildContext context) {
     return BlocListener<PlayingSongCubit, PlayingSongState>(
       listener: (context, state) async {
-        if(state is PlayingSongIsPlaying){
-          await _stop();
-          setState(() {
-            playedSong = state.song;
-          });
-          _play(state.song);
+        if (state is PlayingSongIsPlaying) {
+          if (state.playerState == PlayerState.PLAYING) {
+            setState(() {
+              _position = const Duration();
+              playedSong = state.song;
+            });
+            _play(state.song, isFromListener: true);
+          }
         }
         // TODO: implement listener
       },
@@ -77,9 +79,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
             children: [
               IconButton(
                 key: const Key('play_button'),
-                onPressed: _isPlaying
-                    ? null
-                    : () => _play(playedSong!),
+                onPressed: _isPlaying ? null : () => _play(playedSong!),
                 iconSize: 20.0,
                 icon: const Icon(Icons.play_arrow),
                 color: Colors.cyan,
@@ -197,7 +197,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     _playingRouteState = PlayingRoute.SPEAKERS;
   }
 
-  Future<int> _play(Song song) async {
+  Future<int> _play(Song song, {bool isFromListener = false}) async {
     final playPosition = (_position != null &&
             _duration != null &&
             _position!.inMilliseconds > 0 &&
@@ -208,6 +208,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         await _audioPlayer.play(song.previewUrl ?? "", position: playPosition);
     if (result == 1) {
       setState(() => _playerState = PlayerState.PLAYING);
+      if(!isFromListener){
+        BlocProvider.of<PlayingSongCubit>(context)
+            .playSong(song, _playerState);
+      }
     }
     return result;
   }
@@ -216,6 +220,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     final result = await _audioPlayer.pause();
     if (result == 1) {
       setState(() => _playerState = PlayerState.PAUSED);
+      if (playedSong != null) {
+        BlocProvider.of<PlayingSongCubit>(context)
+            .playSong(playedSong!, _playerState);
+      }
     }
     return result;
   }
@@ -235,11 +243,16 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         _playerState = PlayerState.STOPPED;
         _position = const Duration();
       });
+      if (playedSong != null) {
+        BlocProvider.of<PlayingSongCubit>(context)
+            .playSong(playedSong!, _playerState);
+      }
     }
     return result;
   }
 
   void _onComplete() {
     setState(() => _playerState = PlayerState.STOPPED);
+    BlocProvider.of<PlayingSongCubit>(context).playSong(playedSong!, _playerState);
   }
 }

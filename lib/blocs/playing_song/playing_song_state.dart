@@ -7,6 +7,7 @@ class PlayingSongInitial extends PlayingSongState {}
 
 class PlayingSongIsPlaying extends PlayingSongState {
   final Song song;
+  final PlayerState playerState;
 
-  PlayingSongIsPlaying(this.song);
+  PlayingSongIsPlaying(this.song, this.playerState);
 }

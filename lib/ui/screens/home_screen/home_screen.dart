@@ -17,13 +17,7 @@ class HomeScreen extends StatelessWidget {
             floating: true,
             flexibleSpace: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  kPrimaryColor,
-                  kSecondaryColor,
-                ], stops: [
-                  0.5,
-                  0.9
-                ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                gradient: kPrimaryGradient,
               ),
               child: SafeArea(
                 child: Center(
@@ -32,14 +26,12 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     SearchWidget(),
-                    CurrentQuery(),
                   ],
                 )),
               ),
             ),
             snap: true,
             elevation: 3.0,
-            toolbarHeight: 75,
           ),
         ];
       },

@@ -1,6 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kuncie_test/blocs/search_songs/search_songs_cubit.dart';
 import 'package:kuncie_test/blocs/search_songs/search_songs_cubit.dart';
 
 class CurrentQuery extends StatelessWidget {
