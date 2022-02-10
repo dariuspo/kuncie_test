@@ -18,7 +18,7 @@ class SearchSongsCubit extends Cubit<SearchSongsState> {
   searchSong(String searchTerm) async {
     try {
       emit(SearchSongsLoading());
-      final songs = await songRepository.getSongsByArtistName(Uri.encodeComponent(searchTerm));
+      final songs = await songRepository.getSongsByArtistName(searchTerm);
       emit(SearchSongsLoaded(searchTerm: searchTerm, songs: songs));
     } on DioError catch (e) {
       if (e.error is ErrorResponse) {
