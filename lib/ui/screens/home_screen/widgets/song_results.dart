@@ -18,11 +18,11 @@ class SongResults extends StatelessWidget {
     return BlocBuilder<SearchSongsCubit, SearchSongsState>(
       builder: (context, state) {
         if (state is SearchSongsLoaded) {
-          if(state.songs.isEmpty){
+          if (state.songs.isEmpty) {
             return EmptySearchResult(term: state.searchTerm);
           }
           return ListView.builder(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
             itemBuilder: (context, index) {
               Song song = state.songs[index];
               return ListTile(
@@ -42,7 +42,8 @@ class SongResults extends StatelessWidget {
                 },
                 trailing: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                   builder: (context, state) {
-                    return state.song == song && state.playerState==PlayerState.PLAYING
+                    return state.song == song &&
+                            state.playerState == PlayerState.PLAYING
                         ? const AppAnimationWave()
                         : const SizedBox.shrink();
                   },
@@ -64,7 +65,7 @@ class SongResults extends StatelessWidget {
             children: const [
               Icon(LineIcons.music),
               SizedBox(width: 10),
-              Text("Start search artists"),
+              Text("Start by searching artists"),
             ],
           ),
         );
@@ -76,20 +77,22 @@ class SongResults extends StatelessWidget {
 ///handle empty result for [SongResults]
 class EmptySearchResult extends StatelessWidget {
   final String term;
+
   const EmptySearchResult({Key? key, required this.term}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Row(
+    return Center(
+        child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(LineIcons.frowningFace),
         const SizedBox(width: 5),
         const Text("There is no result for:"),
         const SizedBox(width: 5),
-        Text(term, style: const TextStyle().copyWith(fontWeight: FontWeight.bold)),
+        Text(term,
+            style: const TextStyle().copyWith(fontWeight: FontWeight.bold)),
       ],
     ));
   }
 }
-

@@ -1,16 +1,36 @@
-# kuncie_test
+# Kuncie Take Home Test
+This repository is contains test for Kuncie
 
-Kuncie Take Home Test
+## Supported devices:
+- Samsung Galaxy S10
 
-## Getting Started
+## Supported features:
+- Search music from itunes api based on artists name
+- Play, pause, stop, prev, next music from api response
+- Unit testing for Api Repository using Mocktail and blocTest
+- Dark and light theme
+- Using flutter navigator 2.0 with auto route to support easy deeplinking, named route, and route with parameter
+- Using newest flutter version 2.10 to support Android Material 3
+- Scalable code stucture with flutter bloc state management
+- Using Dio + Retrofit to auto generate any new api request easily
+- Using custom dio intetrceptor so can handle any kind of response and error response from different kind of server
 
-This project is a starting point for a Flutter application.
+## Requirements and Installation
 
-A few resources to get you started if this is your first Flutter project:
+This project requires [Flutter](https://docs.flutter.dev/get-started/install) to be installed.
+For run with android emulator
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+```sh
+cd to_project_path
+flutter pub get
+flutter run --debug (flutter run --release can be used in real device)
+```
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Or build APK first
+```sh
+cd to_project_path
+flutter build apk
+cd to_project_path\build\app\outputs\flutter-apk
+copy app-release.apk to android emulator
+```
+
