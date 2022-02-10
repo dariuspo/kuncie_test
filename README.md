@@ -1,10 +1,12 @@
 # Kuncie Take Home Test
 This repository is contains test for Kuncie
 
-<p float="left">
+<p float="center">
   <img src="https://raw.githubusercontent.com/dariuspo/kuncie_test/main/assets/images/Dark.jpg" height="400">
+  &nbsp; &nbsp; &nbsp; &nbsp;
   <img src="https://raw.githubusercontent.com/dariuspo/kuncie_test/main/assets/images/Light.jpg" height="400">
-  <img src="https://imgur.com/a/AkxQG3u" height="400">
+  &nbsp; &nbsp; &nbsp; &nbsp;
+  <img src="[img]https://i.imgur.com/aU5g55Q.gif" height="400">
 </p>
 
 
