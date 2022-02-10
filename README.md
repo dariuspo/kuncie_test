@@ -1,6 +1,8 @@
 # Kuncie Take Home Test
 This repository is contains test for Kuncie
 
+<img src="https://raw.githubusercontent.com/dariuspo/kuncie_test/main/assets/images/Dark.jpg" height="500">
+
 ## Supported devices:
 - Samsung Galaxy S10
 
