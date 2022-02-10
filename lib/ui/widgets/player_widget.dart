@@ -1,11 +1,10 @@
-import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:audioplayers/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
-import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
+import 'package:kuncie_test/blocs/audio_player/audio_player_bloc.dart';
+import 'package:kuncie_test/blocs/search_songs/search_songs_cubit.dart';
 import 'package:kuncie_test/models/song.dart';
+import 'package:line_icons/line_icons.dart';
 
 class PlayerWidget extends StatefulWidget {
   const PlayerWidget({
@@ -17,242 +16,167 @@ class PlayerWidget extends StatefulWidget {
 }
 
 class _PlayerWidgetState extends State<PlayerWidget> {
-  late AudioPlayer _audioPlayer;
-  Song? playedSong;
-  PlayerState? _audioPlayerState;
-  Duration? _duration;
-  Duration? _position;
+  static const double iconSize = 20;
 
-  PlayerState _playerState = PlayerState.STOPPED;
-  PlayingRoute _playingRouteState = PlayingRoute.SPEAKERS;
-  StreamSubscription? _durationSubscription;
-  StreamSubscription? _positionSubscription;
-  StreamSubscription? _playerCompleteSubscription;
-  StreamSubscription? _playerErrorSubscription;
-  StreamSubscription? _playerStateSubscription;
-  StreamSubscription<PlayerControlCommand>? _playerControlCommandSubscription;
-
-  bool get _isPlaying => _playerState == PlayerState.PLAYING;
-
-  bool get _isPaused => _playerState == PlayerState.PAUSED;
-
-  String get _durationText => _duration?.toString().split('.').first ?? '';
-
-  String get _positionText => _position?.toString().split('.').first ?? '';
-
-  @override
-  void initState() {
-    super.initState();
-    _initAudioPlayer();
+  _playNewSong(Song song) async {
+    BlocProvider.of<AudioPlayerBloc>(context).add(PlayNewSong(song));
   }
 
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    _durationSubscription?.cancel();
-    _positionSubscription?.cancel();
-    _playerCompleteSubscription?.cancel();
-    _playerErrorSubscription?.cancel();
-    _playerStateSubscription?.cancel();
-    _playerControlCommandSubscription?.cancel();
-    super.dispose();
+  _play() async {
+    BlocProvider.of<AudioPlayerBloc>(context).add(ResumeSong());
+  }
+
+  _pause() async {
+    BlocProvider.of<AudioPlayerBloc>(context).add(PauseSong());
+  }
+
+  _stop() async {
+    BlocProvider.of<AudioPlayerBloc>(context).add(StopSong());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PlayingSongCubit, PlayingSongState>(
-      listener: (context, state) async {
-        if (state is PlayingSongIsPlaying) {
-          if (state.playerState == PlayerState.PLAYING) {
-            setState(() {
-              _position = const Duration();
-              playedSong = state.song;
-            });
-            _play(state.song, isFromListener: true);
+    return Container(
+      padding: const EdgeInsets.only(top: 16),
+      color: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : Colors.black,
+      child: BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
+        listener: (context, state) {
+          if (state.haveError) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Failed to play the song"),
+            ));
           }
-        }
-        // TODO: implement listener
-      },
-      child: Column(
-        children: <Widget>[
-          Row(
-            children: [
-              IconButton(
-                key: const Key('play_button'),
-                onPressed: _isPlaying ? null : () => _play(playedSong!),
-                iconSize: 20.0,
-                icon: const Icon(Icons.play_arrow),
+        },
+        builder: (context, state) {
+          Song? song = state.song;
+          bool _isPlaying = state.playerState == PlayerState.PLAYING;
+          bool _isPaused = state.playerState == PlayerState.PAUSED;
+          Duration _duration = state.duration;
+          Duration _position = state.position;
+          String _durationText = _duration.toString().split('.').first;
+          String _positionText = _position.toString().split('.').first;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _buildSongInformation(song),
+              _buildButtonPlayer(
+                _isPlaying,
+                _isPaused,
+                song,
+                _positionText,
+                _durationText,
               ),
-              IconButton(
-                key: const Key('pause_button'),
-                onPressed: _isPlaying ? _pause : null,
-                iconSize: 20.0,
-                icon: const Icon(Icons.pause),
-              ),
-              IconButton(
-                key: const Key('stop_button'),
-                onPressed: _isPlaying || _isPaused ? _stop : null,
-                iconSize: 20.0,
-                icon: const Icon(Icons.stop),
-              ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text(
-                      _position != null
-                          ? '$_positionText / $_durationText'
-                          : _duration != null
-                              ? _durationText
-                              : '',
-                      style: const TextStyle(fontSize: 14.0),
-                    ),
-                  ),
-                ),
-              )
+              _buildSlider(_duration, context, _position),
             ],
-          ),
-          Slider(
-            onChanged: (v) {
-              final duration = _duration;
-              if (duration == null) {
-                return;
-              }
-              final position = v * duration.inMilliseconds;
-              _audioPlayer.seek(Duration(milliseconds: position.round()));
-            },
-            value: (_position != null &&
-                    _duration != null &&
-                    _position!.inMilliseconds > 0 &&
-                    _position!.inMilliseconds < _duration!.inMilliseconds)
-                ? _position!.inMilliseconds / _duration!.inMilliseconds
-                : 0.0,
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  void _initAudioPlayer() {
-    _audioPlayer = AudioPlayer(mode: PlayerMode.MEDIA_PLAYER);
-    _durationSubscription = _audioPlayer.onDurationChanged.listen((duration) {
-      setState(() => _duration = duration);
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
-        // optional: listen for notification updates in the background
-        _audioPlayer.notificationService.startHeadlessService();
-
-        // set at least title to see the notification bar on ios.
-        _audioPlayer.notificationService.setNotification(
-          title: playedSong?.trackName ?? "",
-          artist: playedSong?.artistName ?? "",
-          albumTitle: playedSong?.collectionName ?? "",
-          imageUrl: playedSong?.artworkUrl100 ?? "",
-          forwardSkipInterval: const Duration(seconds: 30),
-          backwardSkipInterval: const Duration(seconds: 30),
-          duration: duration,
-          enableNextTrackButton: true,
-          enablePreviousTrackButton: true,
-        );
-      }
-    });
-
-    _positionSubscription = _audioPlayer.onAudioPositionChanged.listen(
-      (p) => setState(() => _position = p),
+  Visibility _buildSongInformation(Song? song) {
+    return Visibility(
+      visible: song != null,
+      child: FittedBox(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            "${song?.trackName} - ${song?.artistName}",
+            maxLines: 1,
+          ),
+        ),
+      ),
     );
-
-    _playerCompleteSubscription =
-        _audioPlayer.onPlayerCompletion.listen((event) {
-      _onComplete();
-      setState(() {
-        _position = _duration;
-      });
-    });
-
-    _playerErrorSubscription = _audioPlayer.onPlayerError.listen((msg) {
-      setState(() {
-        _playerState = PlayerState.STOPPED;
-        _duration = const Duration();
-        _position = const Duration();
-      });
-    });
-
-    _playerControlCommandSubscription =
-        _audioPlayer.notificationService.onPlayerCommand.listen((command) {});
-
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) {
-        setState(() {
-          _audioPlayerState = state;
-        });
-      }
-    });
-
-    _audioPlayer.onNotificationPlayerStateChanged.listen((state) {
-      if (mounted) {
-        setState(() => _audioPlayerState = state);
-      }
-    });
-
-    _playingRouteState = PlayingRoute.SPEAKERS;
   }
 
-  Future<int> _play(Song song, {bool isFromListener = false}) async {
-    final playPosition = (_position != null &&
-            _duration != null &&
-            _position!.inMilliseconds > 0 &&
-            _position!.inMilliseconds < _duration!.inMilliseconds)
-        ? _position
-        : null;
-    final result =
-        await _audioPlayer.play(song.previewUrl ?? "", position: playPosition);
-    if (result == 1) {
-      setState(() => _playerState = PlayerState.PLAYING);
-      if(!isFromListener){
-        BlocProvider.of<PlayingSongCubit>(context)
-            .playSong(song, _playerState);
-      }
-    }
-    return result;
+  Slider _buildSlider(
+    Duration _duration,
+    BuildContext context,
+    Duration _position,
+  ) {
+    return Slider(
+      onChanged: (v) {
+        final duration = _duration;
+        if (duration == Duration.zero) return;
+        final position = v * duration.inMilliseconds;
+        BlocProvider.of<AudioPlayerBloc>(context).add(SeekTime(
+          Duration(
+            milliseconds: position.round(),
+          ),
+        ));
+      },
+      value: (_position.inMilliseconds > 0 &&
+              _position.inMilliseconds < _duration.inMilliseconds)
+          ? _position.inMilliseconds / _duration.inMilliseconds
+          : 0.0,
+    );
   }
 
-  Future<int> _pause() async {
-    final result = await _audioPlayer.pause();
-    if (result == 1) {
-      setState(() => _playerState = PlayerState.PAUSED);
-      if (playedSong != null) {
-        BlocProvider.of<PlayingSongCubit>(context)
-            .playSong(playedSong!, _playerState);
-      }
-    }
-    return result;
-  }
-
-  Future<int> _earpieceOrSpeakersToggle() async {
-    final result = await _audioPlayer.earpieceOrSpeakersToggle();
-    if (result == 1) {
-      setState(() => _playingRouteState = _playingRouteState.toggle());
-    }
-    return result;
-  }
-
-  Future<int> _stop() async {
-    final result = await _audioPlayer.stop();
-    if (result == 1) {
-      setState(() {
-        _playerState = PlayerState.STOPPED;
-        _position = const Duration();
-      });
-      if (playedSong != null) {
-        BlocProvider.of<PlayingSongCubit>(context)
-            .playSong(playedSong!, _playerState);
-      }
-    }
-    return result;
-  }
-
-  void _onComplete() {
-    setState(() => _playerState = PlayerState.STOPPED);
-    BlocProvider.of<PlayingSongCubit>(context).playSong(playedSong!, _playerState);
+  Row _buildButtonPlayer(bool _isPlaying, bool _isPaused, Song? song,
+      String _positionText, String _durationText) {
+    return Row(
+      children: [
+        IconButton(
+          onPressed: _isPlaying ? null : _play,
+          iconSize: iconSize,
+          icon: const Icon(LineIcons.play),
+        ),
+        IconButton(
+          onPressed: _isPlaying ? _pause : null,
+          iconSize: iconSize,
+          icon: const Icon(LineIcons.pause),
+        ),
+        IconButton(
+          onPressed: _isPlaying || _isPaused ? _stop : null,
+          iconSize: iconSize,
+          icon: const Icon(LineIcons.stop),
+        ),
+        BlocBuilder<SearchSongsCubit, SearchSongsState>(
+          builder: (context, searchedState) {
+            if (searchedState is SearchSongsLoaded) {
+              final index =
+                  searchedState.songs.indexWhere((element) => element == song);
+              return Row(
+                children: [
+                  IconButton(
+                    onPressed: index == 0
+                        ? null
+                        : () => _playNewSong(searchedState.songs[index - 1]),
+                    iconSize: iconSize,
+                    icon: const Icon(LineIcons.stepBackward),
+                  ),
+                  IconButton(
+                    onPressed: index == searchedState.songs.length - 1
+                        ? null
+                        : () => _playNewSong(
+                              searchedState.songs[index + 1],
+                            ),
+                    iconSize: iconSize,
+                    icon: const Icon(LineIcons.stepForward),
+                  ),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 24.0),
+              child: FittedBox(
+                child: Text(
+                  '$_positionText / $_durationText',
+                  style: const TextStyle(fontSize: 14.0),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 }

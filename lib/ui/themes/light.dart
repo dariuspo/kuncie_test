@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kuncie_test/ui/themes/color_scheme.dart';
 
+///App light theme
+
 final ThemeData lightTheme = ThemeData(
   colorSchemeSeed: kPrimaryColor,
   brightness: Brightness.light,

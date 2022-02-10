@@ -2,11 +2,10 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'error_response.g.dart';
 
+///ErrorResponse need to follow server error response
 @JsonSerializable()
 class ErrorResponse implements Exception {
-  String? message;
-  int? code;
-  Map<String, List<String>>? errors;
+  String? errorMessage;
 
   ErrorResponse();
 
@@ -15,6 +14,6 @@ class ErrorResponse implements Exception {
 
   @override
   String toString() {
-    return "ErrorResponse: $message Errors: $errors";
+    return "errorMessage: $errorMessage";
   }
 }

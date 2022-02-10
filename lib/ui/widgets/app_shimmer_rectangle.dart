@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+///Helper widget to handle loading state
 class AppShimmerRectangle extends StatelessWidget {
   final double width, height;
 
@@ -13,8 +14,8 @@ class AppShimmerRectangle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Color(0xFFD0D1E1),
-      highlightColor: Color(0xFF9899B0),
+      baseColor: const Color(0xFFD0D1E1),
+      highlightColor: const Color(0xFF9899B0),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),

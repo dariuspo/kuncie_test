@@ -3,6 +3,7 @@ import 'package:kuncie_test/models/song.dart';
 import 'package:kuncie_test/services/api.dart';
 import 'package:kuncie_test/services/providers/song_provider.dart';
 
+///handle request and response related with song search
 class SongRepository {
   static final SongRepository _instance = SongRepository._internal();
 
@@ -17,7 +18,7 @@ class SongRepository {
 
   SongRepository._internal();
 
-  ///Getting players from API
+  ///Getting songs based on artist from API
   Future<List<Song>> getSongsByArtistName(String artistName) async {
     final songs =  await _provider.searchSong(term: artistName);
     return songs;

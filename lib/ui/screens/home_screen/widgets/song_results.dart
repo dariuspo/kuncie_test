@@ -1,12 +1,14 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
+import 'package:kuncie_test/blocs/audio_player/audio_player_bloc.dart';
 import 'package:kuncie_test/blocs/search_songs/search_songs_cubit.dart';
 import 'package:kuncie_test/models/song.dart';
 import 'package:kuncie_test/ui/screens/home_screen/widgets/list_loading_tile.dart';
 import 'package:kuncie_test/ui/widgets/app_animation_wave.dart';
+import 'package:kuncie_test/ui/widgets/app_error_widget.dart';
 import 'package:kuncie_test/ui/widgets/app_image.dart';
+import 'package:line_icons/line_icons.dart';
 
 class SongResults extends StatelessWidget {
   const SongResults({Key? key}) : super(key: key);
@@ -16,6 +18,9 @@ class SongResults extends StatelessWidget {
     return BlocBuilder<SearchSongsCubit, SearchSongsState>(
       builder: (context, state) {
         if (state is SearchSongsLoaded) {
+          if(state.songs.isEmpty){
+            return EmptySearchResult(term: state.searchTerm);
+          }
           return ListView.builder(
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
@@ -32,27 +37,14 @@ class SongResults extends StatelessWidget {
                 subtitle: Text("${song.artistName}\n${song.collectionName}"),
                 isThreeLine: true,
                 onTap: () {
-                  final playState =
-                      BlocProvider.of<PlayingSongCubit>(context).state;
-                  if (playState is PlayingSongIsPlaying) {
-
-                    if (playState.playerState == PlayerState.PLAYING &&
-                        playState.song == song) {
-                      return;
-                    }
-                  }
-                  BlocProvider.of<PlayingSongCubit>(context)
-                      .playSong(song, PlayerState.PLAYING);
+                  BlocProvider.of<AudioPlayerBloc>(context)
+                      .add(PlayNewSong(song));
                 },
-
-                trailing: BlocBuilder<PlayingSongCubit, PlayingSongState>(
+                trailing: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                   builder: (context, state) {
-                    if (state is PlayingSongIsPlaying) {
-                      return state.song == song
-                          ? const AppAnimationWave()
-                          : const SizedBox.shrink();
-                    }
-                    return const SizedBox.shrink();
+                    return state.song == song && state.playerState==PlayerState.PLAYING
+                        ? const AppAnimationWave()
+                        : const SizedBox.shrink();
                   },
                 ),
               );
@@ -61,10 +53,43 @@ class SongResults extends StatelessWidget {
           );
         }
         if (state is SearchSongsLoading) {
-          return ListLoadingTile();
+          return const ListLoadingTile();
         }
-        return SizedBox.shrink();
+        if (state is SearchSongsFailed) {
+          return AppErrorWidget(errorMessage: state.errorMessage);
+        }
+        return Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(LineIcons.music),
+              SizedBox(width: 10),
+              Text("Start search artists"),
+            ],
+          ),
+        );
       },
     );
   }
 }
+
+///handle empty result for [SongResults]
+class EmptySearchResult extends StatelessWidget {
+  final String term;
+  const EmptySearchResult({Key? key, required this.term}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(LineIcons.frowningFace),
+        const SizedBox(width: 5),
+        const Text("There is no result for:"),
+        const SizedBox(width: 5),
+        Text(term, style: const TextStyle().copyWith(fontWeight: FontWeight.bold)),
+      ],
+    ));
+  }
+}
+

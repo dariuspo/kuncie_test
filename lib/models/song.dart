@@ -3,6 +3,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'song.g.dart';
 
+///Itunes API Data model
+///https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api
 @JsonSerializable()
 class Song extends Equatable {
   final String? artistName;

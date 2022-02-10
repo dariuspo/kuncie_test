@@ -28,14 +28,21 @@ class _SearchFieldState extends State<SearchField> {
       height: 35,
       child: TextField(
         autofocus: true,
+        focusNode: _focusNode,
         textInputAction: TextInputAction.search,
+        controller: _textEditingController,
         onSubmitted: onSearchSubmitted,
+        //this is to show delete button when there is text
+        onChanged: (_) {
+          setState(() {});
+        },
         decoration: InputDecoration(
           filled: true,
           prefixIcon: const Icon(
             LineIcons.search,
             size: 13.5,
-          ),contentPadding: const EdgeInsets.all(5),
+          ),
+          contentPadding: const EdgeInsets.all(5),
           hintText: "Search songs by artist name",
           prefixIconConstraints: const BoxConstraints(
             minWidth: 38,
@@ -46,32 +53,32 @@ class _SearchFieldState extends State<SearchField> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(40),
           ),
-          suffixIcon: _onSearchSuffixIcon,
+          suffixIcon: _onSearchSuffixIcon(),
           suffixIconConstraints: const BoxConstraints(minWidth: 23),
         ),
-
       ),
     );
   }
 
-  Widget get _onSearchSuffixIcon {
-    return _focusNode.hasFocus
+  Widget _onSearchSuffixIcon() {
+    return _textEditingController.text.isNotEmpty
         ? Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: GestureDetector(
-        child: const CircleAvatar(
-          backgroundColor: Color(0xFF67687E),
-          child: Icon(
-            Icons.close,
-            size: 12.5,
-            color: Color(0xFFD0D1E1),
-          ),
-        ),
-        onTap: () {
-          _textEditingController.clear();
-        },
-      ),
-    )
+          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+          child: GestureDetector(
+              child: const CircleAvatar(
+                radius: 10,
+                backgroundColor: Color(0xFF67687E),
+                child: Icon(
+                  Icons.close,
+                  size: 12,
+                  color: Color(0xFFD0D1E1),
+                ),
+              ),
+              onTap: () {
+                _textEditingController.clear();
+              },
+            ),
+        )
         : const SizedBox.shrink();
   }
 }

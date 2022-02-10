@@ -5,6 +5,8 @@ import 'package:kuncie_test/ui/screens/search_screen/search_screen.dart';
 
 part 'app_router.gr.dart';
 
+///Support flutter navigator 2.0 named route and auto generate if
+///parameter is required
 // @CupertinoAutoRouter
 // @AdaptiveAutoRouter
 // @CustomAutoRouter

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kuncie_test/blocs/playing_song/playing_song_cubit.dart';
+import 'package:kuncie_test/blocs/audio_player/audio_player_bloc.dart';
 import 'package:kuncie_test/ui/themes/color_scheme.dart';
 import 'package:rive/rive.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -21,6 +21,7 @@ class _AppAnimationWaveState extends State<AppAnimationWave>
   late RiveAnimationController _controller;
   bool isOnPlayVoice = false;
 
+  ///Delayed is to handle initial load of the rive [Artboard]
   _toggleState(bool isPlaying) async {
     setState(() => _controller.isActive = isPlaying);
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -28,18 +29,18 @@ class _AppAnimationWaveState extends State<AppAnimationWave>
     });
   }
 
+  ///Load the RiveFile from the binary data.
+  /// The [Artboard] is the root of the animation and gets drawn in the
+  /// Rive widget.
   @override
   void initState() {
     super.initState();
     rootBundle.load('assets/animations/sound.riv').then(
       (data) async {
-        // Load the RiveFile from the binary data.
         final file = RiveFile.import(data);
-        // The artboard is the root of the animation and gets drawn in the
-        // Rive widget.
         final artBoard = file.mainArtboard;
         // Add a controller to play back a known animation on the main/default
-        // artboard.We store a reference to it so we can toggle playback.
+        // art board. We store a reference to it so we can toggle playback.
         artBoard.addController(_controller = SimpleAnimation('play'));
         _controller.isActive = true;
         setState(() => _riveArtBoard = artBoard);
@@ -52,32 +53,32 @@ class _AppAnimationWaveState extends State<AppAnimationWave>
     super.dispose();
   }
 
+  /// Overrid [setState] so it only trigger when artboard still mounted
   @override
   void setState(fn) {
     if (mounted) super.setState(fn);
   }
 
+  ///the status of [_riveArtBoard] changed depends of the state of [AudioPlayerBloc]
   @override
   Widget build(BuildContext context) {
     return _riveArtBoard == null
         ? const SizedBox()
-        : BlocListener<PlayingSongCubit, PlayingSongState>(
+        : BlocListener<AudioPlayerBloc, AudioPlayerState>(
             listener: (context, state) {
-              if (state is PlayingSongIsPlaying) {
-                if (state.playerState == PlayerState.PLAYING) {
-                  _toggleState(true);
-                } else {
-                  _toggleState(false);
-                }
+              if (state.playerState == PlayerState.PLAYING) {
+                _toggleState(true);
+              } else {
+                _toggleState(false);
               }
             },
             child: Container(
               alignment: Alignment.centerRight,
-              margin: EdgeInsets.symmetric(vertical: 10),
-              padding: EdgeInsets.all(4),
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.all(4),
               width: 25,
               height: 25,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: kPrimaryGradient
               ),

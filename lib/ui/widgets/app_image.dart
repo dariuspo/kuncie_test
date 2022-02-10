@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+///Image Widget using cached network image
+///Support click action to implement with zoom in function
 class AppImage extends StatelessWidget {
   final String imageUrl;
   final double? width;
@@ -33,48 +35,16 @@ class AppImage extends StatelessWidget {
       }
       return Container();
     }
-    Uri uri = Uri.parse(imageUrl);
-    if (uri.host.contains("googleusercontent.com")) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          if (width != null || height != null) {
-            constraints = BoxConstraints(
-                maxWidth: width ?? double.minPositive,
-                maxHeight: height ?? double.minPositive);
-          } else {
-            final ratio = MediaQuery.of(context).devicePixelRatio;
-            constraints = BoxConstraints(
-              maxWidth: constraints.maxWidth != double.infinity
-                  ? constraints.maxWidth * ratio
-                  : constraints.maxWidth,
-              maxHeight: constraints.maxHeight != double.infinity
-                  ? constraints.maxHeight * ratio
-                  : constraints.maxHeight,
-            );
-          }
-          final _constrainHeight = constraints.maxHeight != double.infinity
-              ? constraints.maxHeight.toInt()
-              : null;
-          final _constrainWidth = constraints.maxWidth != double.infinity
-              ? constraints.maxWidth.toInt()
-              : null;
-          String finalUrl =
-              '$imageUrl=w$_constrainWidth-h$_constrainHeight-c-pp-l100-rj';
-          return _buildImageUsingCachedNetworkImage(context, finalUrl);
-        },
-      );
-    } else {
-      return _buildImageUsingCachedNetworkImage(context, imageUrl);
-    }
+    return _buildImageUsingCachedNetworkImage(context, imageUrl);
   }
 
   Widget _buildImageUsingCachedNetworkImage(
       BuildContext context, String imageUrl) {
     return onTap != null
         ? GestureDetector(
-      onTap: onTap,
-      child: cachedNetworkImage(),
-    )
+            onTap: onTap,
+            child: cachedNetworkImage(),
+          )
         : cachedNetworkImage();
   }
 
@@ -88,7 +58,6 @@ class AppImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
-      // useScaleCacheManager: false,
     );
   }
 }

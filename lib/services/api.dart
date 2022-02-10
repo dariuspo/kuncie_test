@@ -18,7 +18,7 @@ class Api {
   static Dio get client => _instance._dio;
 }
 
-/// Interceptor to print requests, responses, and errors
+/// Interceptor to handle requests, responses, and errors
 class MyInterceptor extends Interceptor {
   //final _repository = UserRepository();
   ///to format data response
@@ -49,6 +49,7 @@ class MyInterceptor extends Interceptor {
       options.queryParameters = {};
     }
 
+    //print request body if this is POST/PUT/Patch Request
     if (options.method != 'GET') {
       if (options.data is Map) {
         _log(
@@ -61,17 +62,14 @@ class MyInterceptor extends Interceptor {
         "=> ${options.method} ${options.uri.toString()}",
       );
     }
-    ///used if API request is using access token
-    /*String? accessToken = await _repository.getAccessToken();
-    if (accessToken != null) {
-      options.headers['Authorization'] = "Bearer $accessToken";
-    }*/
     super.onRequest(options, handler);
   }
 
   @override
   onResponse(Response response, ResponseInterceptorHandler handler) {
+    //because the data from apple is String need to decode first
     Map result = jsonDecode(response.data);
+    //results here is object key from the response
     if (result.containsKey("results")) {
       response.data = result["results"];
       _log(
@@ -82,24 +80,27 @@ class MyInterceptor extends Interceptor {
     super.onResponse(response, handler);
   }
 
+  ///Error response from server need to be converted to [ErrorResponse]
   @override
   onError(DioError err, ErrorInterceptorHandler handler) {
     var error = err.error;
+    logger.e("onError: $error data: ${err.response?.data}");
+    if(err.response?.data is String){
+      Map<String, dynamic> data = jsonDecode(err.response!.data);
+      throw ErrorResponse.fromJson(data);
+    }
     if (err.response?.data is Map) {
       Map<String, dynamic> data = err.response!.data;
-      logger.e(data);
       if (data.containsKey("errors")) {
         Map<String, dynamic> errors = data['errors'];
         throw ErrorResponse.fromJson(errors);
       }
     } else if (error is SocketException) {
-      logger.e('SocketException');
       Map<String, dynamic> errors = {
         'message': 'No internet connection'
       };
       throw ErrorResponse.fromJson(errors);
     } else if(error is TypeError){
-      logger.e('Type Error');
       Map<String, dynamic> errors = {
         'message': 'Type error $error'
       };

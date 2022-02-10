@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+///App color scheme
 const kPrimaryColor = Color(0xFFa88beb);
 const kSecondaryColor = Color(0xFFf8ceec);
 const kPrimaryGradient = LinearGradient(

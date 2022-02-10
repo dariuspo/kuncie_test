@@ -4,6 +4,7 @@ import 'package:retrofit/retrofit.dart';
 
 part 'song_provider.g.dart';
 
+///Using retrofit to auto generate dio request
 @RestApi()
 abstract class SongProvider {
   factory SongProvider(Dio dio, {String baseUrl}) = _SongProvider;
