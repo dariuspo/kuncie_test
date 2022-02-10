@@ -6,9 +6,9 @@ This repository is contains test for Kuncie
   &nbsp; &nbsp; &nbsp; &nbsp;
   <img src="https://raw.githubusercontent.com/dariuspo/kuncie_test/main/assets/images/Light.jpg" height="400">
   &nbsp; &nbsp; &nbsp; &nbsp;
-  <img src="https://i.imgur.com/aU5g55Q.gif" height="400">
 </p>
 
+Video preview : https://i.imgur.com/aU5g55Q.gif
 
 ## Supported devices:
 - Samsung Galaxy S10
